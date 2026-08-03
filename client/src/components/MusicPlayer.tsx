@@ -1,64 +1,65 @@
-import { useState, useRef, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
-import gsap from 'gsap';
 
-interface MusicPlayerProps {
-  musicUrl?: string;
-}
-
-export const MusicPlayer = ({ musicUrl }: MusicPlayerProps) => {
+export const MusicPlayer = () => {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
+    const audio = new Audio('/song.mp3');
+    audio.loop = true;
+    audio.volume = 0.5;
+    audioRef.current = audio;
+
+    // Jaise hi user kahin bhi click kare ya key press kare, gana bajne lagega
+    const handleFirstInteraction = () => {
+      if (audioRef.current && audioRef.current.paused) {
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+          window.removeEventListener('click', handleFirstInteraction);
+          window.removeEventListener('keydown', handleFirstInteraction);
+        }).catch((e) => console.log("Autoplay prevented:", e));
+      }
+    };
+
+    window.addEventListener('click', handleFirstInteraction);
+    window.addEventListener('keydown', handleFirstInteraction);
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      window.removeEventListener('click', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, []);
+
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!audioRef.current) return;
 
     if (isPlaying) {
-      audio.play().catch(() => {
-        // Autoplay may be blocked by browser
-        setIsPlaying(false);
-      });
+      audioRef.current.pause();
+      setIsPlaying(false);
     } else {
-      audio.pause();
-    }
-  }, [isPlaying]);
-
-  const handleToggle = () => {
-    setIsPlaying(!isPlaying);
-
-    // Animate button
-    if (buttonRef.current) {
-      gsap.to(buttonRef.current, {
-        scale: 0.9,
-        duration: 0.2,
-        yoyo: true,
-        repeat: 1,
-      });
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+      }).catch((e) => console.log("Play failed:", e));
     }
   };
 
   return (
-    <>
-      <audio
-        ref={audioRef}
-        loop
-        src={musicUrl || '/music/romantic-piano.mp3'}
-      />
-      <button
-        ref={buttonRef}
-        onClick={handleToggle}
-        className="fixed bottom-8 right-8 z-40 p-4 rounded-full glass hover:scale-110 transition-transform duration-300"
-        aria-label={isPlaying ? 'Mute music' : 'Play music'}
-        title={isPlaying ? 'Music: On' : 'Music: Off'}
-      >
-        {isPlaying ? (
-          <Volume2 className="w-6 h-6 text-pink-400" />
-        ) : (
-          <VolumeX className="w-6 h-6 text-gray-400" />
-        )}
-      </button>
-    </>
+    <button
+      onClick={togglePlay}
+      className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-pink-500/80 hover:bg-pink-600 text-white shadow-lg backdrop-blur-sm transition-all duration-300 flex items-center justify-center cursor-pointer animate-bounce"
+      aria-label={isPlaying ? "Mute music" : "Play music"}
+    >
+      {isPlaying ? (
+        <Volume2 className="w-6 h-6 animate-pulse" />
+      ) : (
+        <VolumeX className="w-6 h-6 opacity-80" />
+      )}
+    </button>
   );
 };

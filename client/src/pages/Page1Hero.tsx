@@ -15,16 +15,20 @@ export const Page1Hero = ({ onNext }: Page1HeroProps) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    // Animate character wave
+    // Animate character with a hanging/swinging pendulum effect from the top center
     if (characterRef.current) {
-      gsap.to(characterRef.current, {
-        rotation: 20,
-        duration: 0.5,
-        yoyo: true,
-        repeat: -1,
-        ease: 'sine.inOut',
-        delay: 0.5,
-      });
+      gsap.fromTo(
+        characterRef.current,
+        { rotation: -12 },
+        {
+          rotation: 12,
+          duration: 1.8,
+          yoyo: true,
+          repeat: -1,
+          ease: 'sine.inOut',
+          transformOrigin: 'top center',
+        }
+      );
     }
 
     // Stagger text animations
@@ -99,13 +103,19 @@ export const Page1Hero = ({ onNext }: Page1HeroProps) => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-4 max-w-2xl">
-        {/* Animated Character */}
+      <div className="relative z-10 text-center px-4 max-w-2xl flex flex-col items-center">
+        {/* Animated Character - Teddy Hanging/Swinging Effect */}
         <div
           ref={characterRef}
-          className="mb-12 text-8xl md:text-9xl origin-center"
+          className="mb-8 flex flex-col items-center"
         >
-          👋
+          {/* Optional hanging string line */}
+          <div className="w-0.5 h-10 bg-pink-400/40 -mt-10 mb-0" />
+          <img
+            src="/teddy2.png"
+            alt="Teddy Bear"
+            className="w-36 h-36 md:w-44 md:h-44 object-contain drop-shadow-lg"
+          />
         </div>
 
         {/* Main Title - Heart Removed */}

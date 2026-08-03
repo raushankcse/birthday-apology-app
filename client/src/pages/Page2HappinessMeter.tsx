@@ -15,6 +15,7 @@ export const Page2HappinessMeter = ({ onNext }: Page2HappinessMeterProps) => {
   const [currentPercent, setCurrentPercent] = useState(0);
 
   const percentages = [0, 20, 50, 75, 95, 120];
+  const floatingEmojis = ['🩷', '🥰', '🤗', '✨', '💖', '💘', '🌸'];
 
   useEffect(() => {
     let currentIndex = 0;
@@ -87,20 +88,52 @@ export const Page2HappinessMeter = ({ onNext }: Page2HappinessMeterProps) => {
       ref={pageRef}
       className="relative min-h-screen w-full bg-gradient-to-b from-[#1a1a2e] via-[#0a0a0f] to-[#2E114E] flex flex-col items-center justify-center overflow-hidden px-4"
     >
-      {/* Background particles */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(15)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-purple-400 rounded-full opacity-20"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animation: `float ${5 + i * 0.5}s ease-in-out infinite`,
-            }}
-          />
-        ))}
+      {/* Background Floating Emojis Animation */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        {[...Array(20)].map((_, i) => {
+          const randomEmoji = floatingEmojis[Math.floor(Math.random() * floatingEmojis.length)];
+          const randomLeft = Math.random() * 100;
+          const randomDuration = 4 + Math.random() * 4; 
+          const randomDelay = Math.random() * 5;
+          const randomSize = 1.5 + Math.random() * 1.5;
+
+          return (
+            <div
+              key={i}
+              className="absolute select-none opacity-90 drop-shadow-[0_0_8px_rgba(255,46,147,0.6)]"
+              style={{
+                left: `${randomLeft}%`,
+                bottom: '-15%',
+                fontSize: `${randomSize}rem`,
+                animation: `flyUp ${randomDuration}s linear infinite`,
+                animationDelay: `${randomDelay}s`,
+              }}
+            >
+              {randomEmoji}
+            </div>
+          );
+        })}
       </div>
+
+      {/* Inline keyframes for bottom-to-top floating */}
+      <style>{`
+        @keyframes flyUp {
+          0% {
+            transform: translateY(0) scale(0.8) rotate(0deg);
+            opacity: 0;
+          }
+          20% {
+            opacity: 0.8;
+          }
+          80% {
+            opacity: 0.8;
+          }
+          100% {
+            transform: translateY(-110vh) scale(1.2) rotate(360deg);
+            opacity: 0;
+          }
+        }
+      `}</style>
 
       {/* Content */}
       <div className="relative z-10 max-w-2xl w-full text-center">
